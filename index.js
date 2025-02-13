@@ -24,12 +24,22 @@ async function scanMusicFolder(folderPath) {
           const fullPath = path.join(folderPath, entry.name);
           const metadata = await musicMetadata.parseFile(fullPath);
           
+          // 提取专辑封面
+          let cover = null;
+          if (metadata.common.picture?.length > 0) {
+            cover = {
+              format: metadata.common.picture[0].format,
+              data: metadata.common.picture[0].data.toString('base64')
+            };
+          }
+          
           musicFiles.push({
             id: slugify(`${Date.now()}-${entry.name}`, { lower: true, strict: true }),
             path: fullPath,
-            title: metadata.common.title || entry.name,
+            title: metadata.common.title || path.parse(entry.name).name,
             artist: metadata.common.artist || 'Unknown Artist',
-            duration: metadata.format.duration || 0
+            duration: metadata.format.duration || 0,
+            cover // 添加封面信息
           });
         } catch (error) {
           console.error('Error parsing music file:', error);
@@ -45,8 +55,8 @@ async function scanMusicFolder(folderPath) {
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,

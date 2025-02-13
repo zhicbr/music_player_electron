@@ -7,15 +7,22 @@
 </head>
 <body>
     <div class="container">
-        <button id="select-folder">选择音乐文件夹</button>
-        <div class="player-controls">
-            <button id="prev">上一曲</button>
-            <button id="play-pause">播放/暂停</button>
-            <button id="next">下一曲</button>
+        <div class="left-section">
+            <button id="select-folder">选择音乐文件夹</button>
+            <div class="player-controls">
+                <button id="prev">上一曲</button>
+                <button id="play-pause">播放/暂停</button>
+                <button id="next">下一曲</button>
+            </div>
+            <div class="album-cover-container">
+                <img id="album-cover" src="default-cover.jpg" alt="Album Cover">
+            </div>
+            <div id="now-playing"></div>
+            <audio id="audio-player"></audio>
         </div>
-        <div id="now-playing"></div>
-        <div id="playlist"></div>
-        <audio id="audio-player"></audio>
+        <div class="right-section">
+            <div id="playlist"></div>
+        </div>
     </div>
     <script>
         const { ipcRenderer } = require('electron');
@@ -52,8 +59,33 @@
         // 播放控制
         function playTrack(track) {
             const audio = document.getElementById('audio-player');
+            const coverImg = document.getElementById('album-cover');
+
             audio.src = track.path;
             audio.play();
+            
+            // 显示专辑封面
+            if (track.cover) {
+                try {
+                    // 增加解码验证和类型检测
+                    console.log('封面数据格式:', track.cover.format);
+                    const byteCharacters = atob(track.cover.data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: track.cover.format || 'image/jpeg' });
+                    coverImg.src = URL.createObjectURL(blob);
+                    console.log('生成的封面URL:', coverImg.src);
+                } catch (error) {
+                    console.error('封面解析错误:', error);
+                    coverImg.src = 'default-cover.jpg';
+                }
+            } else {
+                coverImg.src = 'default-cover.jpg';
+            }
+
             document.getElementById('now-playing').textContent = `正在播放：${track.title} - ${track.artist}`;
             document.querySelector('.playing')?.classList.remove('playing');
             document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
