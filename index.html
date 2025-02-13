@@ -97,6 +97,10 @@
 
             // 开始旋转封面
             coverImg.classList.add('rotate');
+
+            // 滚动当前歌曲到中央
+            const currentTrackElement = document.querySelector(`[data-index="${currentTrackIndex}"]`);
+            currentTrackElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         document.getElementById('play-pause').addEventListener('click', () => {
