@@ -64,10 +64,15 @@
         function playTrack(track) {
             const audio = document.getElementById('audio-player');
             const coverImg = document.getElementById('album-cover');
+            const playPauseIcon = document.getElementById('play-pause').querySelector('i');
 
             audio.src = track.path;
             audio.play();
             
+            // 更新播放/暂停按钮状态
+            playPauseIcon.classList.remove('fa-play');
+            playPauseIcon.classList.add('fa-pause');
+
             // 显示专辑封面
             if (track.cover) {
                 try {
