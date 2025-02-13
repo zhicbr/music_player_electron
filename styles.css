@@ -1,0 +1,76 @@
+body {
+    background-color: #2d2d2d;
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+.container {
+    padding: 20px;
+}
+
+button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#playlist {
+    margin-top: 20px;
+}
+
+.track {
+    padding: 10px;
+    background-color: #404040;
+    margin: 5px 0;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.track:hover {
+    background-color: #4d4d4d;
+}
+
+.track.playing {
+    background-color: #007acc;
+}
+
+.title {
+    flex: 2;
+}
+
+.artist {
+    flex: 1;
+    color: #cccccc;
+}
+
+.duration {
+    color: #999999;
+}
+
+#now-playing {
+    margin: 15px 0;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.player-controls {
+    margin: 15px 0;
+    display: flex;
+    gap: 10px;
+}
+
+audio {
+    width: 100%;
+    margin-top: 20px;
+}

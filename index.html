@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <button id="select-folder">选择音乐文件夹</button>
+        <div class="player-controls">
+            <button id="prev">上一曲</button>
+            <button id="play-pause">播放/暂停</button>
+            <button id="next">下一曲</button>
+        </div>
+        <div id="now-playing"></div>
+        <div id="playlist"></div>
+        <audio id="audio-player"></audio>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        let currentTrackIndex = 0;
+        let playlist = [];
+
+        // 选择文件夹
+        document.getElementById('select-folder').addEventListener('click', async () => {
+            const newTracks = await ipcRenderer.invoke('open-directory');
+            playlist = await ipcRenderer.invoke('get-playlist');
+            renderPlaylist();
+        });
+
+        // 渲染播放列表
+        function renderPlaylist() {
+            const list = document.getElementById('playlist');
+            list.innerHTML = playlist.map((track, index) => `
+                <div class="track ${index === currentTrackIndex ? 'playing' : ''}" data-index="${index}">
+                    <span class="title">${track.title}</span>
+                    <span class="artist">${track.artist}</span>
+                    <span class="duration">${formatDuration(track.duration)}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.track').forEach(item => {
+                item.addEventListener('click', () => {
+                    currentTrackIndex = parseInt(item.dataset.index);
+                    playTrack(playlist[currentTrackIndex]);
+                });
+            });
+        }
+
+        // 播放控制
+        function playTrack(track) {
+            const audio = document.getElementById('audio-player');
+            audio.src = track.path;
+            audio.play();
+            document.getElementById('now-playing').textContent = `正在播放：${track.title} - ${track.artist}`;
+            document.querySelector('.playing')?.classList.remove('playing');
+            document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
+        }
+
+        document.getElementById('play-pause').addEventListener('click', () => {
+            const audio = document.getElementById('audio-player');
+            audio.paused ? audio.play() : audio.pause();
+        });
+
+        document.getElementById('prev').addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+            playTrack(playlist[currentTrackIndex]);
+        });
+
+        document.getElementById('next').addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            playTrack(playlist[currentTrackIndex]);
+        });
+
+        // 时间格式化
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // 初始化加载播放列表
+        (async () => {
+            playlist = await ipcRenderer.invoke('get-playlist');
+            renderPlaylist();
+        })();
+    </script>
+</body>
+</html>

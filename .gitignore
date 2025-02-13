@@ -1,0 +1,57 @@
+# Node.js dependencies
+/node_modules
+
+# Logs and databases
+*.log
+*.sqlite3
+*.jsonld
+
+# System generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+/.vscode/
+/.idea/
+/*.sublime-project
+/*.sublime-workspace
+/project.cwl
+
+# Build output directories
+/dist/
+/build/
+/out/
+
+# Environment variables file
+.env
+
+# Temporary files
+*.tmp
+*.bak
+
+# Electron build artifacts
+electron-builder.json
+release-builds/
+
+# Yarn and npm cache
+.pnp.*
+.npmrc
+.yarn-integrity
+yarn-error.log
+
+# MacOS files
+*.dmg
+*.app
+
+# Windows files
+*.exe
+*.pdb
+*.lib
+*.dll
+*.exp
+
+# Linux files
+*.so
+
+# Ignore the node-gyp files for native modules
+.gyp_configure_settings.json

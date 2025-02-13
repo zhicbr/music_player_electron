@@ -1,0 +1,36 @@
+{
+  "name": "music_player_electron",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "electron-store": "^8.2.0",
+    "music-metadata": "^6.3.2",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "electron": "^34.1.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.example.yourapp",
+    "productName": "YourAppName",
+    "directories": {
+      "output": "dist"
+    },
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "win": {},
+    "linux": {}
+  }
+}
