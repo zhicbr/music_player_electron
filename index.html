@@ -44,8 +44,9 @@
         let playlist = [];
         let audio = document.getElementById('audio-player');
 
-        // 新增：音频加载控制
+        // 新增：音频加载控制标识及当前请求ID，解决快速切歌问题
         let isAudioLoading = false;
+        let currentPlayRequest = 0;  // 每次播放（或加载）都会自增
 
         // 保存播放状态到存储
         function savePlaybackState() {
@@ -76,7 +77,10 @@
 
         // 修改后的播放控制函数
         async function playTrack(track) {
-            // 停止当前播放的音频
+            // 增加新的请求ID
+            const requestId = ++currentPlayRequest;
+
+            // 停止当前播放的音频并解除事件监听
             if (!audio.paused) {
                 audio.pause();
                 audio.removeEventListener('timeupdate', updateProgress);
@@ -101,20 +105,37 @@
             await new Promise((resolve) => {
                 newAudio.src = track.path;
                 newAudio.addEventListener('loadedmetadata', () => {
+                    // 若当前请求非最新，则直接停止该音频并退出
+                    if (requestId !== currentPlayRequest) {
+                        newAudio.pause();
+                        return resolve();
+                    }
                     // 更新持续时间显示
                     document.getElementById('duration').textContent = formatDuration(newAudio.duration);
                     resolve();
                 }, { once: true });
             });
 
+            // 如果请求已过期，则退出
+            if (requestId !== currentPlayRequest) {
+                isAudioLoading = false;
+                return;
+            }
+
             // 替换原有音频元素
             const oldAudio = audio;
             audio = newAudio;
-            oldAudio.remove();
+
+            if (oldAudio && typeof oldAudio.remove === 'function') {
+                oldAudio.remove();
+            }
 
             // 初始化播放状态
             audio.currentTime = 0;
             audio.play();
+
+            // 如果音频正在播放，则确保封面动画状态为“running”
+            coverImg.style.animationPlayState = 'running';
 
             // 更新播放控制状态
             playPauseIcon.classList.remove('fa-play');
@@ -142,12 +163,15 @@
             document.querySelector('.playing')?.classList.remove('playing');
             document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
 
-            // 开始旋转封面
+            // 开始旋转封面（确保同时添加类和设置动画状态）
             coverImg.classList.add('rotate');
+            coverImg.style.animationPlayState = 'running';
 
             // 滚动当前歌曲到中央
             const currentTrackElement = document.querySelector(`[data-index="${currentTrackIndex}"]`);
-            currentTrackElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (currentTrackElement) {
+                currentTrackElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
 
             // 保存播放状态
             savePlaybackState();
@@ -161,7 +185,10 @@
 
         // 新增：加载曲目信息但不播放
         async function loadTrack(track) {
-            // 停止当前播放的音频
+            // 增加新的请求ID
+            const requestId = ++currentPlayRequest;
+
+            // 停止当前播放的音频并解除事件监听
             if (!audio.paused) {
                 audio.pause();
                 audio.removeEventListener('timeupdate', updateProgress);
@@ -185,16 +212,29 @@
             await new Promise((resolve) => {
                 newAudio.src = track.path;
                 newAudio.addEventListener('loadedmetadata', () => {
+                    if (requestId !== currentPlayRequest) {
+                        newAudio.pause();
+                        return resolve();
+                    }
                     // 更新持续时间显示
                     document.getElementById('duration').textContent = formatDuration(newAudio.duration);
                     resolve();
                 }, { once: true });
             });
 
+            // 如果请求已过期，则退出
+            if (requestId !== currentPlayRequest) {
+                isAudioLoading = false;
+                return;
+            }
+
             // 替换原有音频元素
             const oldAudio = audio;
             audio = newAudio;
-            oldAudio.remove();
+
+            if (oldAudio && typeof oldAudio.remove === 'function') {
+                oldAudio.remove();
+            }
 
             // 显示专辑封面
             if (track.cover) {
@@ -222,7 +262,9 @@
             audio.pause();
             document.getElementById('play-pause').querySelector('i').classList.add('fa-play');
             document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
-            coverImg.style.animationPlayState = 'paused'; // 确保封面动画暂停
+
+            // 停止封面旋转
+            coverImg.style.animationPlayState = 'paused';
 
             isAudioLoading = false;
         }
@@ -230,7 +272,6 @@
         // 修改后的进度更新函数
         function updateProgress() {
             if (isAudioLoading) return;
-
             const progress = (audio.currentTime / audio.duration) * 100;
             document.getElementById('progress-bar').value = progress;
             document.getElementById('current-time').textContent = formatDuration(audio.currentTime);
@@ -245,7 +286,6 @@
         document.getElementById('play-pause').addEventListener('click', () => {
             const playPauseIcon = document.getElementById('play-pause').querySelector('i');
             const coverImg = document.getElementById('album-cover');
-
             if (audio.paused) {
                 audio.play();
                 playPauseIcon.classList.remove('fa-play');
@@ -299,7 +339,6 @@
             if (playlist.length > 0) {
                 const track = playlist[currentTrackIndex];
                 await loadTrack(track);
-
                 audio.currentTime = lastPlayedTime;
 
                 // 更新进度显示
