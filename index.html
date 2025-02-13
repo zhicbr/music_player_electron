@@ -89,19 +89,26 @@
             document.getElementById('now-playing').textContent = `正在播放：${track.title} - ${track.artist}`;
             document.querySelector('.playing')?.classList.remove('playing');
             document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
+
+            // 开始旋转封面
+            coverImg.classList.add('rotate');
         }
 
         document.getElementById('play-pause').addEventListener('click', () => {
             const audio = document.getElementById('audio-player');
             const playPauseIcon = document.getElementById('play-pause').querySelector('i');
+            const coverImg = document.getElementById('album-cover');
+
             if (audio.paused) {
                 audio.play();
                 playPauseIcon.classList.remove('fa-play');
                 playPauseIcon.classList.add('fa-pause');
+                coverImg.classList.add('rotate'); // 恢复旋转
             } else {
                 audio.pause();
                 playPauseIcon.classList.remove('fa-pause');
                 playPauseIcon.classList.add('fa-play');
+                coverImg.classList.remove('rotate'); // 停止旋转
             }
         });
 
