@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const Store = require('electron-store');
 const fs = require('fs/promises');
 const path = require('path'); 
@@ -64,19 +64,33 @@ function createWindow() {
   });
 
   mainWindow.loadFile('index.html');
-}
 
-ipcMain.handle('open-directory', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openDirectory']
-  });
-  if (!result.canceled && result.filePaths.length > 0) {
-    const addedFiles = await scanMusicFolder(result.filePaths[0]);
-    store.set('musicFolders', [...store.get('musicFolders'), result.filePaths[0]]);
-    return addedFiles;
-  }
-  return [];
-});
+  // 创建菜单
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: '选择音乐文件夹',
+          click: async () => {
+            const result = await dialog.showOpenDialog({
+              properties: ['openDirectory']
+            });
+            if (!result.canceled && result.filePaths.length > 0) {
+              const addedFiles = await scanMusicFolder(result.filePaths[0]);
+              store.set('musicFolders', [...store.get('musicFolders'), result.filePaths[0]]);
+              mainWindow.webContents.send('update-playlist', addedFiles);
+            }
+          }
+        },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }
+  ]);
+
+  Menu.setApplicationMenu(menu);
+}
 
 ipcMain.handle('get-playlist', () => {
   return store.get('playlist');

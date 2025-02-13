@@ -185,3 +185,36 @@ audio {
     margin-top: 20px;
     outline: none;
 }
+
+.progress-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 20px 0;
+}
+
+#progress-bar {
+    width: 100%;
+    cursor: pointer;
+}
+
+#time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.player-controls button {
+    background-color: transparent;
+    border: none;
+    color: #7f5fff;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.player-controls button:hover {
+    color: #8865ff;
+}

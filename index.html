@@ -5,20 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <div class="left-section">
-            <button id="select-folder">选择音乐文件夹</button>
-            <div class="player-controls">
-                <button id="prev">上一曲</button>
-                <button id="play-pause">播放/暂停</button>
-                <button id="next">下一曲</button>
-            </div>
             <div class="album-cover-container">
                 <img id="album-cover" src="default-cover.jpg" alt="Album Cover">
             </div>
             <div id="now-playing"></div>
+            <div class="progress-container">
+                <input type="range" id="progress-bar" min="0" max="100" value="0">
+                <div id="time-display">
+                    <span id="current-time">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+            </div>
+            <div class="player-controls">
+                <button id="prev"><i class="fas fa-backward"></i></button>
+                <button id="play-pause"><i class="fas fa-play"></i></button>
+                <button id="next"><i class="fas fa-forward"></i></button>
+            </div>
             <audio id="audio-player"></audio>
         </div>
         <div class="right-section-container" id="right-section-container">
@@ -33,13 +40,6 @@
         
         let currentTrackIndex = 0;
         let playlist = [];
-
-        // 选择文件夹
-        document.getElementById('select-folder').addEventListener('click', async () => {
-            const newTracks = await ipcRenderer.invoke('open-directory');
-            playlist = await ipcRenderer.invoke('get-playlist');
-            renderPlaylist();
-        });
 
         // 渲染播放列表
         function renderPlaylist() {
@@ -93,7 +93,16 @@
 
         document.getElementById('play-pause').addEventListener('click', () => {
             const audio = document.getElementById('audio-player');
-            audio.paused ? audio.play() : audio.pause();
+            const playPauseIcon = document.getElementById('play-pause').querySelector('i');
+            if (audio.paused) {
+                audio.play();
+                playPauseIcon.classList.remove('fa-play');
+                playPauseIcon.classList.add('fa-pause');
+            } else {
+                audio.pause();
+                playPauseIcon.classList.remove('fa-pause');
+                playPauseIcon.classList.add('fa-play');
+            }
         });
 
         document.getElementById('prev').addEventListener('click', () => {
@@ -105,6 +114,7 @@
             currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             playTrack(playlist[currentTrackIndex]);
         });
+
         document.getElementById('toggle-list').addEventListener('click', () => {
             const container = document.querySelector('.container');
             const rightContainer = document.getElementById('right-section-container');
@@ -125,12 +135,31 @@
             renderPlaylist();
         })();
 
-        // 切换播放列表的收起与展开
-        document.getElementById('toggle-playlist').addEventListener('click', () => {
-            const rightSection = document.querySelector('.right-section');
-            const leftSection = document.querySelector('.left-section');
-            rightSection.classList.toggle('collapsed');
-            leftSection.classList.toggle('expanded');
+        // 监听播放列表更新
+        ipcRenderer.on('update-playlist', (event, newTracks) => {
+            playlist = newTracks;
+            renderPlaylist();
+        });
+
+        // 更新进度条
+        const audio = document.getElementById('audio-player');
+        const progressBar = document.getElementById('progress-bar');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+
+        audio.addEventListener('timeupdate', () => {
+            const progress = (audio.currentTime / audio.duration) * 100;
+            progressBar.value = progress;
+            currentTimeDisplay.textContent = formatDuration(audio.currentTime);
+        });
+
+        progressBar.addEventListener('input', () => {
+            const seekTime = (progressBar.value / 100) * audio.duration;
+            audio.currentTime = seekTime;
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            durationDisplay.textContent = formatDuration(audio.duration);
         });
     </script>
 </body>
