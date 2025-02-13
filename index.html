@@ -41,6 +41,15 @@
         let currentTrackIndex = 0;
         let playlist = [];
 
+        // 新增：保存播放状态到存储
+        function savePlaybackState() {
+            const audio = document.getElementById('audio-player');
+            ipcRenderer.send('save-playback-state', {
+                index: currentTrackIndex,
+                time: audio.currentTime
+            });
+        }
+
         // 渲染播放列表
         function renderPlaylist() {
             const list = document.getElementById('playlist');
@@ -60,7 +69,7 @@
             });
         }
 
-        // 播放控制
+        // 修改后的播放控制
         function playTrack(track) {
             const audio = document.getElementById('audio-player');
             const coverImg = document.getElementById('album-cover');
@@ -69,7 +78,6 @@
             audio.src = track.path;
             audio.play();
             
-            // 更新播放/暂停按钮状态
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
 
@@ -101,6 +109,45 @@
             // 滚动当前歌曲到中央
             const currentTrackElement = document.querySelector(`[data-index="${currentTrackIndex}"]`);
             currentTrackElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // 新增：保存播放状态
+            savePlaybackState();
+        }
+
+        // 新增：加载曲目信息但不播放
+        function loadTrack(track) {
+            const audio = document.getElementById('audio-player');
+            const coverImg = document.getElementById('album-cover');
+
+            audio.src = track.path;
+            
+            // 显示专辑封面
+            if (track.cover) {
+                try {
+                    const byteCharacters = atob(track.cover.data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: track.cover.format || 'image/jpeg' });
+                    coverImg.src = URL.createObjectURL(blob);
+                } catch (error) {
+                    coverImg.src = 'default-cover.jpg';
+                }
+            } else {
+                coverImg.src = 'default-cover.jpg';
+            }
+
+            document.getElementById('now-playing').textContent = `正在播放：${track.title} - ${track.artist}`;
+            document.querySelector('.playing')?.classList.remove('playing');
+            document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
+
+            // 确保暂停状态
+            audio.pause();
+            document.getElementById('play-pause').querySelector('i').classList.add('fa-play');
+            document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
+            coverImg.classList.remove('rotate');
         }
 
         document.getElementById('play-pause').addEventListener('click', () => {
@@ -145,11 +192,37 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
-        // 初始化加载播放列表
+        // 初始化加载播放列表和状态
         (async () => {
-            playlist = await ipcRenderer.invoke('get-playlist');
+            const { playlist: storedPlaylist, lastPlayedIndex, lastPlayedTime } = await ipcRenderer.invoke('get-playlist');
+            playlist = storedPlaylist;
+            
+            // 处理索引越界
+            currentTrackIndex = lastPlayedIndex;
+            if (currentTrackIndex >= playlist.length && playlist.length > 0) {
+                currentTrackIndex = 0;
+            }
+
             renderPlaylist();
+
+            if (playlist.length > 0) {
+                const track = playlist[currentTrackIndex];
+                loadTrack(track);
+                
+                const audio = document.getElementById('audio-player');
+                audio.currentTime = lastPlayedTime;
+                
+                // 更新进度显示
+                document.getElementById('duration').textContent = formatDuration(track.duration);
+                document.getElementById('current-time').textContent = formatDuration(lastPlayedTime);
+                document.getElementById('progress-bar').value = (lastPlayedTime / track.duration) * 100 || 0;
+            }
         })();
+
+        // 窗口关闭前保存状态
+        window.addEventListener('beforeunload', () => {
+            savePlaybackState();
+        });
 
         // 监听播放列表更新
         ipcRenderer.on('update-playlist', (event, newTracks) => {

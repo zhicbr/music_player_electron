@@ -5,10 +5,14 @@ const path = require('path');
 const musicMetadata = require('music-metadata');
 const slugify = require('slugify');
 
+// 修改存储设置
 const store = new Store({
   defaults: {
     musicFolders: [],
-    playlist: []
+    playlist: [],
+    lastPlayedIndex: 0,
+    lastPlayedTime: 0,
+    isFirstTime: true
   }
 });
 
@@ -49,6 +53,14 @@ async function scanMusicFolder(folderPath) {
   
   const currentList = store.get('playlist');
   store.set('playlist', [...currentList, ...musicFiles]);
+
+  // 如果是首次扫描，初始化播放状态
+  if (store.get('isFirstTime') && musicFiles.length > 0) {
+    store.set('isFirstTime', false);
+    store.set('lastPlayedIndex', 0);
+    store.set('lastPlayedTime', 0);
+  }
+  
   return musicFiles;
 }
 
@@ -92,8 +104,18 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 }
 
+// 新增：处理保存播放状态
+ipcMain.on('save-playback-state', (_, { index, time }) => {
+  store.set('lastPlayedIndex', index);
+  store.set('lastPlayedTime', time);
+});
+
 ipcMain.handle('get-playlist', () => {
-  return store.get('playlist');
+  return {
+    playlist: store.get('playlist'),
+    lastPlayedIndex: store.get('lastPlayedIndex'),
+    lastPlayedTime: store.get('lastPlayedTime')
+  };
 });
 
 app.whenReady().then(createWindow);
