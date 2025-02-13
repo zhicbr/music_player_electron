@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <div class="left-section">
@@ -37,13 +39,16 @@
     </div>
     <script>
         const { ipcRenderer } = require('electron');
-        
+
         let currentTrackIndex = 0;
         let playlist = [];
+        let audio = document.getElementById('audio-player');
+
+        // 新增：音频加载控制
+        let isAudioLoading = false;
 
         // 保存播放状态到存储
         function savePlaybackState() {
-            const audio = document.getElementById('audio-player');
             ipcRenderer.send('save-playback-state', {
                 index: currentTrackIndex,
                 time: audio.currentTime
@@ -69,16 +74,49 @@
             });
         }
 
-        // 播放控制
-        function playTrack(track) {
-            const audio = document.getElementById('audio-player');
+        // 修改后的播放控制函数
+        async function playTrack(track) {
+            // 停止当前播放的音频
+            if (!audio.paused) {
+                audio.pause();
+                audio.removeEventListener('timeupdate', updateProgress);
+                audio.removeEventListener('ended', handleTrackEnd);
+            }
+
+            isAudioLoading = true;
+
+            // 立即重置UI状态
+            document.getElementById('progress-bar').value = 0;
+            document.getElementById('current-time').textContent = '0:00';
+            document.getElementById('duration').textContent = '0:00';
+
             const coverImg = document.getElementById('album-cover');
             const playPauseIcon = document.getElementById('play-pause').querySelector('i');
 
-            audio.src = track.path;
+            // 创建新的音频实例
+            const newAudio = new Audio();
+            newAudio.preload = 'metadata';
+
+            // 加载元数据
+            await new Promise((resolve) => {
+                newAudio.src = track.path;
+                newAudio.addEventListener('loadedmetadata', () => {
+                    // 更新持续时间显示
+                    document.getElementById('duration').textContent = formatDuration(newAudio.duration);
+                    resolve();
+                }, { once: true });
+            });
+
+            // 替换原有音频元素
+            const oldAudio = audio;
+            audio = newAudio;
+            oldAudio.remove();
+
+            // 初始化播放状态
+            audio.currentTime = 0;
             audio.play();
-            
-            // 更新播放/暂停按钮状态
+
+            // 更新播放控制状态
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
 
@@ -113,15 +151,51 @@
 
             // 保存播放状态
             savePlaybackState();
+
+            // 绑定新音频事件
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('ended', handleTrackEnd);
+
+            isAudioLoading = false;
         }
 
         // 新增：加载曲目信息但不播放
-        function loadTrack(track) {
-            const audio = document.getElementById('audio-player');
+        async function loadTrack(track) {
+            // 停止当前播放的音频
+            if (!audio.paused) {
+                audio.pause();
+                audio.removeEventListener('timeupdate', updateProgress);
+                audio.removeEventListener('ended', handleTrackEnd);
+            }
+
+            isAudioLoading = true;
+
+            // 立即重置UI状态
+            document.getElementById('progress-bar').value = 0;
+            document.getElementById('current-time').textContent = '0:00';
+            document.getElementById('duration').textContent = '0:00';
+
             const coverImg = document.getElementById('album-cover');
 
-            audio.src = track.path;
-            
+            // 创建新的音频实例
+            const newAudio = new Audio();
+            newAudio.preload = 'metadata';
+
+            // 加载元数据
+            await new Promise((resolve) => {
+                newAudio.src = track.path;
+                newAudio.addEventListener('loadedmetadata', () => {
+                    // 更新持续时间显示
+                    document.getElementById('duration').textContent = formatDuration(newAudio.duration);
+                    resolve();
+                }, { once: true });
+            });
+
+            // 替换原有音频元素
+            const oldAudio = audio;
+            audio = newAudio;
+            oldAudio.remove();
+
             // 显示专辑封面
             if (track.cover) {
                 try {
@@ -149,19 +223,26 @@
             document.getElementById('play-pause').querySelector('i').classList.add('fa-play');
             document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
             coverImg.classList.remove('rotate');
+
+            isAudioLoading = false;
         }
 
-        // 初始化音频播放器
-        const audio = document.getElementById('audio-player');
+        // 修改后的进度更新函数
+        function updateProgress() {
+            if (isAudioLoading) return;
+
+            const progress = (audio.currentTime / audio.duration) * 100;
+            document.getElementById('progress-bar').value = progress;
+            document.getElementById('current-time').textContent = formatDuration(audio.currentTime);
+        }
 
         // 播放结束自动下一首
-        audio.addEventListener('ended', () => {
+        function handleTrackEnd() {
             currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             playTrack(playlist[currentTrackIndex]);
-        });
+        }
 
         document.getElementById('play-pause').addEventListener('click', () => {
-            const audio = document.getElementById('audio-player');
             const playPauseIcon = document.getElementById('play-pause').querySelector('i');
             const coverImg = document.getElementById('album-cover');
 
@@ -206,7 +287,7 @@
         (async () => {
             const { playlist: storedPlaylist, lastPlayedIndex, lastPlayedTime } = await ipcRenderer.invoke('get-playlist');
             playlist = storedPlaylist;
-            
+
             // 处理索引越界
             currentTrackIndex = lastPlayedIndex;
             if (currentTrackIndex >= playlist.length && playlist.length > 0) {
@@ -217,15 +298,13 @@
 
             if (playlist.length > 0) {
                 const track = playlist[currentTrackIndex];
-                loadTrack(track);
-                
-                const audio = document.getElementById('audio-player');
+                await loadTrack(track);
+
                 audio.currentTime = lastPlayedTime;
-                
+
                 // 更新进度显示
-                document.getElementById('duration').textContent = formatDuration(track.duration);
                 document.getElementById('current-time').textContent = formatDuration(lastPlayedTime);
-                document.getElementById('progress-bar').value = (lastPlayedTime / track.duration) * 100 || 0;
+                document.getElementById('progress-bar').value = (lastPlayedTime / audio.duration) * 100 || 0;
             }
         })();
 
@@ -242,23 +321,11 @@
 
         // 更新进度条
         const progressBar = document.getElementById('progress-bar');
-        const currentTimeDisplay = document.getElementById('current-time');
-        const durationDisplay = document.getElementById('duration');
-
-        audio.addEventListener('timeupdate', () => {
-            const progress = (audio.currentTime / audio.duration) * 100;
-            progressBar.value = progress;
-            currentTimeDisplay.textContent = formatDuration(audio.currentTime);
-        });
-
         progressBar.addEventListener('input', () => {
             const seekTime = (progressBar.value / 100) * audio.duration;
             audio.currentTime = seekTime;
         });
-
-        audio.addEventListener('loadedmetadata', () => {
-            durationDisplay.textContent = formatDuration(audio.duration);
-        });
     </script>
 </body>
+
 </html>
