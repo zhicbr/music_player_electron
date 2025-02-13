@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Music Player</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -20,8 +21,11 @@
             <div id="now-playing"></div>
             <audio id="audio-player"></audio>
         </div>
-        <div class="right-section">
-            <div id="playlist"></div>
+        <div class="right-section-container" id="right-section-container">
+            <button id="toggle-list" class="toggle-button">▶</button>
+            <div class="right-section" id="right-section">
+                <div id="playlist"></div>
+            </div>
         </div>
     </div>
     <script>
@@ -67,8 +71,6 @@
             // 显示专辑封面
             if (track.cover) {
                 try {
-                    // 增加解码验证和类型检测
-                    console.log('封面数据格式:', track.cover.format);
                     const byteCharacters = atob(track.cover.data);
                     const byteNumbers = new Array(byteCharacters.length);
                     for (let i = 0; i < byteCharacters.length; i++) {
@@ -77,9 +79,7 @@
                     const byteArray = new Uint8Array(byteNumbers);
                     const blob = new Blob([byteArray], { type: track.cover.format || 'image/jpeg' });
                     coverImg.src = URL.createObjectURL(blob);
-                    console.log('生成的封面URL:', coverImg.src);
                 } catch (error) {
-                    console.error('封面解析错误:', error);
                     coverImg.src = 'default-cover.jpg';
                 }
             } else {
@@ -105,6 +105,12 @@
             currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
             playTrack(playlist[currentTrackIndex]);
         });
+        document.getElementById('toggle-list').addEventListener('click', () => {
+            const container = document.querySelector('.container');
+            const rightContainer = document.getElementById('right-section-container');
+            rightContainer.classList.toggle('is-collapsed');
+            container.classList.toggle('is-collapsed');
+        });
 
         // 时间格式化
         function formatDuration(seconds) {
@@ -118,6 +124,14 @@
             playlist = await ipcRenderer.invoke('get-playlist');
             renderPlaylist();
         })();
+
+        // 切换播放列表的收起与展开
+        document.getElementById('toggle-playlist').addEventListener('click', () => {
+            const rightSection = document.querySelector('.right-section');
+            const leftSection = document.querySelector('.left-section');
+            rightSection.classList.toggle('collapsed');
+            leftSection.classList.toggle('expanded');
+        });
     </script>
 </body>
 </html>

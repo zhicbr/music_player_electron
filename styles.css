@@ -1,6 +1,6 @@
 body {
-    background-color: #2d2d2d;
-    color: #ffffff;
+    background-color: #f5e6ff;
+    color: #3d3d3d;
     font-family: 'Arial', sans-serif;
     margin: 0;
     height: 100vh;
@@ -12,6 +12,7 @@ body {
     padding: 20px;
     height: 100%;
     box-sizing: border-box;
+    transition: all 0.3s ease;
 }
 
 .left-section {
@@ -20,17 +21,77 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: all 0.3s ease;
+}
+
+.right-section-container {
+    position: relative;
+    flex: 1;
+    max-width: 35%;
+    transition: all 0.3s ease;
 }
 
 .right-section {
-    flex: 1;
-    max-width: 35%;
+    height: 100%;
     overflow-y: auto;
     margin-left: 20px;
+    transition: all 0.3s ease;
+    /* 隐藏滚动条 */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 和 Edge */
+}
+
+/* 隐藏 WebKit 浏览器（Chrome、Safari）的滚动条 */
+.right-section::-webkit-scrollbar {
+    display: none;
+}
+
+.toggle-button {
+    position: fixed; /* 使用 fixed 定位，确保按钮不会被裁剪 */
+    left: calc(60% + 20px); /* 默认位置在左侧，与右侧区域对齐 */
+    top: 40px; /* 调整按钮的垂直位置 */
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background-color: #9a7dff;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000; /* 提高 z-index，确保按钮在最上层 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.right-section-container.is-collapsed {
+    flex: 0;
+    max-width: 0;
+    overflow: hidden; /* 修复：收起时隐藏溢出内容 */
+}
+
+.right-section-container.is-collapsed .toggle-button {
+    left: auto;
+    right: 20px; /* 按钮移动到右侧，距离边缘 20px */
+    transform: rotate(180deg);
+}
+
+.right-section-container.is-collapsed .right-section {
+    opacity: 0;
+    margin-left: 0;
+    overflow: hidden; /* 修复：收起时隐藏滚动条 */
+    width: 0; /* 修复：收起时完全隐藏右侧区域 */
+}
+
+.container.is-collapsed .left-section {
+    max-width: 100%;
+    transform: translateX(-8%);
 }
 
 button {
-    background-color: #4CAF50;
+    background-color: #9a7dff;
     border: none;
     color: white;
     padding: 10px 20px;
@@ -38,10 +99,11 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
-    background-color: #45a049;
+    background-color: #8865ff;
 }
 
 #playlist {
@@ -50,22 +112,23 @@ button:hover {
 
 .track {
     padding: 10px;
-    background-color: #404040;
+    background-color: #e6d5ff;
     margin: 5px 0;
     border-radius: 4px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
 }
 
 .track:hover {
-    background-color: #4d4d4d;
+    background-color: #d9c7ff;
 }
 
 .track.playing {
-    background-color: #007acc;
+    background-color: #7f5fff;
+    color: white;
 }
 
 .title {
@@ -75,13 +138,13 @@ button:hover {
 
 .artist {
     flex: 1;
-    color: #cccccc;
+    color: #666;
     font-size: 14px;
     text-align: center;
 }
 
 .duration {
-    color: #999999;
+    color: #999;
     font-size: 14px;
     width: 50px;
     text-align: right;
@@ -89,7 +152,7 @@ button:hover {
 
 #now-playing {
     margin: 15px 0;
-    color: #4CAF50;
+    color: #7f5fff;
     font-weight: bold;
     font-size: 18px;
     text-align: center;
@@ -105,7 +168,7 @@ button:hover {
     width: 250px;
     height: 250px;
     margin: 20px 0;
-    background-color: #333;
+    background-color: #d9c7ff;
     border-radius: 50%;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);

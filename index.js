@@ -24,7 +24,6 @@ async function scanMusicFolder(folderPath) {
           const fullPath = path.join(folderPath, entry.name);
           const metadata = await musicMetadata.parseFile(fullPath);
           
-          // 提取专辑封面
           let cover = null;
           if (metadata.common.picture?.length > 0) {
             cover = {
@@ -39,7 +38,7 @@ async function scanMusicFolder(folderPath) {
             title: metadata.common.title || path.parse(entry.name).name,
             artist: metadata.common.artist || 'Unknown Artist',
             duration: metadata.format.duration || 0,
-            cover // 添加封面信息
+            cover
           });
         } catch (error) {
           console.error('Error parsing music file:', error);
