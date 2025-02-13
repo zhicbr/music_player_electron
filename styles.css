@@ -87,7 +87,7 @@ body {
 
 .container.is-collapsed .left-section {
     max-width: 100%;
-    transform: translateX(-8%);
+    transform: translateX(0%);
 }
 
 button {
