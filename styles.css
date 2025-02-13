@@ -179,10 +179,13 @@ button:hover {
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s linear;
+    animation: rotate 20s linear infinite; /* 10秒旋转一圈 */
+    animation-play-state: running; /* 默认动画状态为运行 */
 }
 
 .rotate {
     animation: rotate 20s linear infinite; /* 10秒旋转一圈 */
+    animation-play-state: running; /* 确保动画状态为运行 */
 }
 
 @keyframes rotate {

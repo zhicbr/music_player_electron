@@ -222,7 +222,7 @@
             audio.pause();
             document.getElementById('play-pause').querySelector('i').classList.add('fa-play');
             document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
-            coverImg.classList.remove('rotate');
+            coverImg.style.animationPlayState = 'paused'; // 确保封面动画暂停
 
             isAudioLoading = false;
         }
@@ -250,12 +250,12 @@
                 audio.play();
                 playPauseIcon.classList.remove('fa-play');
                 playPauseIcon.classList.add('fa-pause');
-                coverImg.classList.add('rotate'); // 恢复旋转
+                coverImg.style.animationPlayState = 'running'; // 恢复旋转
             } else {
                 audio.pause();
                 playPauseIcon.classList.remove('fa-pause');
                 playPauseIcon.classList.add('fa-play');
-                coverImg.classList.remove('rotate'); // 停止旋转
+                coverImg.style.animationPlayState = 'paused'; // 暂停旋转
             }
         });
 
@@ -305,6 +305,14 @@
                 // 更新进度显示
                 document.getElementById('current-time').textContent = formatDuration(lastPlayedTime);
                 document.getElementById('progress-bar').value = (lastPlayedTime / audio.duration) * 100 || 0;
+
+                // 初始化封面动画状态
+                const coverImg = document.getElementById('album-cover');
+                if (audio.paused) {
+                    coverImg.style.animationPlayState = 'paused'; // 如果音频是暂停的，封面动画也暂停
+                } else {
+                    coverImg.style.animationPlayState = 'running'; // 如果音频是播放的，封面动画继续
+                }
             }
         })();
 
