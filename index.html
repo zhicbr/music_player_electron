@@ -41,7 +41,7 @@
         let currentTrackIndex = 0;
         let playlist = [];
 
-        // 新增：保存播放状态到存储
+        // 保存播放状态到存储
         function savePlaybackState() {
             const audio = document.getElementById('audio-player');
             ipcRenderer.send('save-playback-state', {
@@ -69,7 +69,7 @@
             });
         }
 
-        // 修改后的播放控制
+        // 播放控制
         function playTrack(track) {
             const audio = document.getElementById('audio-player');
             const coverImg = document.getElementById('album-cover');
@@ -78,6 +78,7 @@
             audio.src = track.path;
             audio.play();
             
+            // 更新播放/暂停按钮状态
             playPauseIcon.classList.remove('fa-play');
             playPauseIcon.classList.add('fa-pause');
 
@@ -110,7 +111,7 @@
             const currentTrackElement = document.querySelector(`[data-index="${currentTrackIndex}"]`);
             currentTrackElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // 新增：保存播放状态
+            // 保存播放状态
             savePlaybackState();
         }
 
@@ -149,6 +150,15 @@
             document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
             coverImg.classList.remove('rotate');
         }
+
+        // 初始化音频播放器
+        const audio = document.getElementById('audio-player');
+
+        // 播放结束自动下一首
+        audio.addEventListener('ended', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            playTrack(playlist[currentTrackIndex]);
+        });
 
         document.getElementById('play-pause').addEventListener('click', () => {
             const audio = document.getElementById('audio-player');
@@ -231,7 +241,6 @@
         });
 
         // 更新进度条
-        const audio = document.getElementById('audio-player');
         const progressBar = document.getElementById('progress-bar');
         const currentTimeDisplay = document.getElementById('current-time');
         const durationDisplay = document.getElementById('duration');
