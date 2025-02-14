@@ -163,6 +163,7 @@
         }
 
         // 新增：歌词更新函数
+        // 新增：歌词更新函数，支持多句歌词显示
         function updateLyrics() {
             if (!lyrics.length) return; // 如果没有歌词，直接返回
             const currentTime = audio.currentTime;
@@ -178,13 +179,31 @@
             if (newIndex !== currentLyricIndex) {
                 currentLyricIndex = newIndex;
                 const lyricsContainer = document.getElementById('lyrics-container');
-                lyricsContainer.textContent = currentLyricIndex >= 0
-                    ? lyrics[currentLyricIndex].text
-                    : ''; // 如果没有歌词，显示空内容
+                lyricsContainer.innerHTML = ''; // 清空歌词显示
 
-                // 自动滚动到可见区域
-                if (lyricsContainer.firstChild) {
-                    lyricsContainer.scrollTop = lyricsContainer.scrollHeight;
+                // 显示多句歌词（当前歌词及其前后几句）
+                const startIndex = Math.max(0, currentLyricIndex - 2); // 显示当前歌词的前两句
+                const endIndex = Math.min(lyrics.length - 1, currentLyricIndex + 2); // 显示当前歌词的后两句
+
+                for (let i = startIndex; i <= endIndex; i++) {
+                    const lyric = lyrics[i];
+                    const p = document.createElement('p');
+                    p.textContent = lyric.text;
+
+                    // 如果是当前歌词，设置高亮样式
+                    if (i === currentLyricIndex) {
+                        p.classList.add('highlight'); // 高亮当前歌词
+                    } else {
+                        p.classList.remove('highlight'); // 其他歌词正常显示
+                    }
+
+                    lyricsContainer.appendChild(p);
+                }
+
+                // 自动滚动到当前歌词
+                const currentLyricElement = lyricsContainer.querySelector('.highlight');
+                if (currentLyricElement) {
+                    currentLyricElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
         }

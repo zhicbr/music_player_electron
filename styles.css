@@ -233,12 +233,11 @@ button:hover {
 .lyrics-container {
     width: 100%;
     max-width: 400px;
-    min-height: 80px;
-    max-height: 150px;
-    margin: 20px 0;
-    padding: 10px;
+    height: 150px;
+    margin: 5px 0;
+    padding: 5px;
     text-align: center;
-    font-size: 25px;
+    font-size: 16px;
     color: #240303;
     white-space: pre-line;
     overflow-y: auto;
@@ -249,19 +248,36 @@ button:hover {
     font-weight: normal; /* 可以是 normal, bold, 或者具体的数值如 400, 700 等 */
     font-style: normal; /* 可以是 normal, italic 等 */
 }
+/* 歌词高亮样式（当前播放的歌词） */
+.lyrics-container .highlight {
+    color: #7f5fff; /* 高亮颜色 */
+    font-weight: bold; /* 加粗 */
+    font-size: 25px; /* 高亮时字体稍大 */
+    transition: all 0.3s ease; /* 平滑过渡 */
+}
 
+/* 歌词段落样式 */
+.lyrics-container p {
+    margin: 5px 0; /* 段落间距 */
+    transition: all 0.3s ease; /* 平滑过渡 */
+}
+
+
+
+.lyrics-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); /* 滚动条轨道颜色 */
+    display: none;
+}
+
+.lyrics-container::-webkit-scrollbar-thumb {
+    background: #7f5fff; /* 滚动条滑块颜色 */
+    border-radius: 3px;
+    display: none;
+}
 .lyrics-container::-webkit-scrollbar {
     width: 6px;
 }
 
-.lyrics-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
-}
-
-.lyrics-container::-webkit-scrollbar-thumb {
-    background: #7f5fff;
-    border-radius: 3px;
-}
 audio {
     width: 100%;
     margin-top: 20px;
