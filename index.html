@@ -413,6 +413,7 @@
             } catch (error) {
                 console.log('未找到歌词文件'); // 如果没有歌词文件，忽略错误
             }
+            audio.addEventListener('ended', handleTrackEnd);
             isAudioLoading = false;
         }
 
