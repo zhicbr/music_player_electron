@@ -68,6 +68,7 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    icon:'resources/picture/icon.png',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
