@@ -7,6 +7,7 @@ body {
 }
 
 .container {
+    position: relative; 
     display: flex;
     justify-content: space-between;
     padding: 20px;
@@ -16,12 +17,25 @@ body {
 }
 
 .left-section {
+    position: relative;
+
     flex: 1;
     max-width: 60%;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: all 0.3s ease;
+}
+
+
+.visualizer-container {
+    position: absolute;
+    top: 10px;          
+    left: 10px;        
+    right: 10px;       
+    height: 270px;
+    background: rgba(220, 163, 170, 0.3);
+    border-radius: 20px;
 }
 
 .right-section-container {
@@ -165,6 +179,7 @@ button:hover {
 }
 
 .album-cover-container {
+    z-index: 1000;
     width: 250px;
     height: 250px;
     margin: 20px 0;
