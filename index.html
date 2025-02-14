@@ -14,7 +14,6 @@
         <div class="left-section">
             <div class="album-cover-container">
                 <img id="album-cover" src="default-cover.jpg" alt="Album Cover">
-
             </div>
             <div class="visualizer-container" id="visualizer">
                 <!-- Bars will be dynamically added here -->
@@ -32,6 +31,7 @@
                 <button id="play-pause"><i class="fas fa-play"></i></button>
                 <button id="next"><i class="fas fa-forward"></i></button>
             </div>
+            <div id="lyrics-container" class="lyrics-container"></div>
             <audio id="audio-player"></audio>
         </div>
         <div class="right-section-container" id="right-section-container">
@@ -43,6 +43,7 @@
     </div>
     <script>
         const { ipcRenderer } = require('electron');
+        const fs = require('fs/promises');
 
         let currentTrackIndex = 0;
         let playlist = [];
@@ -58,6 +59,10 @@
         let source;
         let animation;
         const BAR_COUNT = 64;
+
+        // 新增：歌词相关变量
+        let lyrics = []; // 存储解析后的歌词
+        let currentLyricIndex = -1; // 当前显示的歌词索引
 
         // 初始化音频上下文和分析器
         function initAudioContext() {
@@ -127,6 +132,61 @@
                     playTrack(playlist[currentTrackIndex]);
                 });
             });
+        }
+
+        // 新增：歌词解析函数
+        function parseLyrics(content) {
+            const lines = content.split('\n');
+            const regex = /\[(\d{2}):(\d{2}\.\d{2})\](.*)/;
+            const parsed = [];
+            let prevTime = null;
+
+            lines.forEach(line => {
+                const match = line.match(regex);
+                if (match) {
+                    const minutes = parseInt(match[1], 10);
+                    const seconds = parseFloat(match[2]);
+                    const time = minutes * 60 + seconds;
+                    const text = match[3].trim();
+
+                    if (prevTime === time) {
+                        // 如果时间相同，合并歌词（用于中英文双语歌词）
+                        parsed[parsed.length - 1].text += '\n' + text;
+                    } else {
+                        parsed.push({ time, text });
+                        prevTime = time;
+                    }
+                }
+            });
+
+            return parsed.sort((a, b) => a.time - b.time); // 按时间排序
+        }
+
+        // 新增：歌词更新函数
+        function updateLyrics() {
+            if (!lyrics.length) return; // 如果没有歌词，直接返回
+            const currentTime = audio.currentTime;
+
+            // 找到当前应该显示的歌词
+            let newIndex = -1;
+            for (let i = 0; i < lyrics.length; i++) {
+                if (lyrics[i].time > currentTime) break;
+                newIndex = i;
+            }
+
+            // 如果当前歌词索引发生变化，更新显示
+            if (newIndex !== currentLyricIndex) {
+                currentLyricIndex = newIndex;
+                const lyricsContainer = document.getElementById('lyrics-container');
+                lyricsContainer.textContent = currentLyricIndex >= 0
+                    ? lyrics[currentLyricIndex].text
+                    : ''; // 如果没有歌词，显示空内容
+
+                // 自动滚动到可见区域
+                if (lyricsContainer.firstChild) {
+                    lyricsContainer.scrollTop = lyricsContainer.scrollHeight;
+                }
+            }
         }
 
         // 修改后的播放控制函数
@@ -234,17 +294,28 @@
             audio.addEventListener('timeupdate', updateProgress);
             audio.addEventListener('ended', handleTrackEnd);
 
-            
             // 每次播放时重新连接音频源到分析器
-            if (source) {
-                source.disconnect();
-            }
+            // if (source) {
+            //     source.disconnect();
+            // }
             // 连接音频源到分析器
             source = audioContext.createMediaElementSource(audio);
             source.connect(analyser);
             analyser.connect(audioContext.destination);
 
             visualize();
+
+            // 新增：加载歌词
+            lyrics = []; // 清空之前的歌词
+            currentLyricIndex = -1; // 重置当前歌词索引
+            document.getElementById('lyrics-container').textContent = ''; // 清空歌词显示
+            try {
+                const lrcPath = track.path.replace(/\.[^.]+$/, '.lrc'); // 获取同目录下的 .lrc 文件路径
+                const content = await fs.readFile(lrcPath, 'utf-8'); // 读取歌词文件
+                lyrics = parseLyrics(content); // 解析歌词
+            } catch (error) {
+                console.log('未找到歌词文件'); // 如果没有歌词文件，忽略错误
+            }
 
             isAudioLoading = false;
         }
@@ -331,7 +402,17 @@
 
             // 停止封面旋转
             coverImg.style.animationPlayState = 'paused';
-
+                        // 新增：加载歌词
+            lyrics = []; // 清空之前的歌词
+            currentLyricIndex = -1; // 重置当前歌词索引
+            document.getElementById('lyrics-container').textContent = ''; // 清空歌词显示
+            try {
+                const lrcPath = track.path.replace(/\.[^.]+$/, '.lrc'); // 获取同目录下的 .lrc 文件路径
+                const content = await fs.readFile(lrcPath, 'utf-8'); // 读取歌词文件
+                lyrics = parseLyrics(content); // 解析歌词
+            } catch (error) {
+                console.log('未找到歌词文件'); // 如果没有歌词文件，忽略错误
+            }
             isAudioLoading = false;
         }
 
@@ -341,6 +422,9 @@
             const progress = (audio.currentTime / audio.duration) * 100;
             document.getElementById('progress-bar').value = progress;
             document.getElementById('current-time').textContent = formatDuration(audio.currentTime);
+
+            // 新增：更新歌词显示
+            updateLyrics();
         }
 
         // 播放结束自动下一首
@@ -357,7 +441,7 @@
                 playPauseIcon.classList.remove('fa-play');
                 playPauseIcon.classList.add('fa-pause');
                 coverImg.style.animationPlayState = 'running'; // 恢复旋转
-                //确保音频源连接到分析器
+                // 确保音频源连接到分析器
                 // if (source) {
                 //     source.disconnect();
                 // }

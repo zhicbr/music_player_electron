@@ -230,6 +230,38 @@ button:hover {
     }
 }
 
+.lyrics-container {
+    width: 100%;
+    max-width: 400px;
+    min-height: 80px;
+    max-height: 150px;
+    margin: 20px 0;
+    padding: 10px;
+    text-align: center;
+    font-size: 25px;
+    color: #240303;
+    white-space: pre-line;
+    overflow-y: auto;
+    background-color: #f5e6ff;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-family: 'Microsoft YaHei', sans-serif; 
+    font-weight: normal; /* 可以是 normal, bold, 或者具体的数值如 400, 700 等 */
+    font-style: normal; /* 可以是 normal, italic 等 */
+}
+
+.lyrics-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.lyrics-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.lyrics-container::-webkit-scrollbar-thumb {
+    background: #7f5fff;
+    border-radius: 3px;
+}
 audio {
     width: 100%;
     margin-top: 20px;
