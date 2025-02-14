@@ -234,6 +234,11 @@
             audio.addEventListener('timeupdate', updateProgress);
             audio.addEventListener('ended', handleTrackEnd);
 
+            
+            // 每次播放时重新连接音频源到分析器
+            if (source) {
+                source.disconnect();
+            }
             // 连接音频源到分析器
             source = audioContext.createMediaElementSource(audio);
             source.connect(analyser);
@@ -352,6 +357,15 @@
                 playPauseIcon.classList.remove('fa-play');
                 playPauseIcon.classList.add('fa-pause');
                 coverImg.style.animationPlayState = 'running'; // 恢复旋转
+                // 确保音频源连接到分析器
+                if (source) {
+                    source.disconnect();
+                }
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+
+                visualize();
             } else {
                 audio.pause();
                 playPauseIcon.classList.remove('fa-pause');
