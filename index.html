@@ -357,10 +357,10 @@
                 playPauseIcon.classList.remove('fa-play');
                 playPauseIcon.classList.add('fa-pause');
                 coverImg.style.animationPlayState = 'running'; // 恢复旋转
-                // 确保音频源连接到分析器
-                if (source) {
-                    source.disconnect();
-                }
+                //确保音频源连接到分析器
+                // if (source) {
+                //     source.disconnect();
+                // }
                 source = audioContext.createMediaElementSource(audio);
                 source.connect(analyser);
                 analyser.connect(audioContext.destination);
