@@ -277,6 +277,7 @@ audio {
 #progress-bar {
     width: 100%;
     cursor: pointer;
+    accent-color: #7f5fff; /* 将进度条的颜色设置为紫色 */
 }
 
 #time-display {
