@@ -230,7 +230,7 @@
             // 保存播放状态
             savePlaybackState();
 
-            // 绑定新音频事件
+            // 确保在播放时绑定 timeupdate 事件
             audio.addEventListener('timeupdate', updateProgress);
             audio.addEventListener('ended', handleTrackEnd);
 
@@ -337,7 +337,7 @@
 
         // 修改后的进度更新函数
         function updateProgress() {
-            if (isAudioLoading) return;
+            if (isAudioLoading || !audio || !audio.duration) return;
             const progress = (audio.currentTime / audio.duration) * 100;
             document.getElementById('progress-bar').value = progress;
             document.getElementById('current-time').textContent = formatDuration(audio.currentTime);
@@ -427,6 +427,9 @@
                 } else {
                     coverImg.style.animationPlayState = 'running'; // 如果音频是播放的，封面动画继续
                 }
+
+                // 确保在初始化时绑定 timeupdate 事件
+                audio.addEventListener('timeupdate', updateProgress);
             }
 
             // 初始化音频上下文和可视化条
