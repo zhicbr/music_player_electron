@@ -138,7 +138,7 @@
         // 新增：歌词解析函数
         function parseLyrics(content) {
             const lines = content.split('\n');
-            const regex = /\[(\d{2}):(\d{2}\.\d{2})\](.*)/;
+            const regex = /\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/; // 修改正则表达式以匹配2位或3位小数
             const parsed = [];
             let prevTime = null;
 
@@ -162,7 +162,6 @@
 
             return parsed.sort((a, b) => a.time - b.time); // 按时间排序
         }
-
         // 新增：歌词更新函数
         function updateLyrics() {
             if (!lyrics.length) return; // 如果没有歌词，直接返回
