@@ -63,6 +63,7 @@
         // 新增：歌词相关变量
         let lyrics = []; // 存储解析后的歌词
         let currentLyricIndex = -1; // 当前显示的歌词索引
+        let lyricsScrollTimeout; // 用于歌词自动滚动的定时器
 
         // 初始化音频上下文和分析器
         function initAudioContext() {
@@ -163,7 +164,6 @@
         }
 
         // 新增：歌词更新函数
-        // 新增：歌词更新函数，支持多句歌词显示
         function updateLyrics() {
             if (!lyrics.length) return; // 如果没有歌词，直接返回
             const currentTime = audio.currentTime;
@@ -181,12 +181,8 @@
                 const lyricsContainer = document.getElementById('lyrics-container');
                 lyricsContainer.innerHTML = ''; // 清空歌词显示
 
-                // 显示多句歌词（当前歌词及其前后几句）
-                const startIndex = Math.max(0, currentLyricIndex - 2); // 显示当前歌词的前两句
-                const endIndex = Math.min(lyrics.length - 1, currentLyricIndex + 2); // 显示当前歌词的后两句
-
-                for (let i = startIndex; i <= endIndex; i++) {
-                    const lyric = lyrics[i];
+                // 显示完整歌词
+                lyrics.forEach((lyric, i) => {
                     const p = document.createElement('p');
                     p.textContent = lyric.text;
 
@@ -198,7 +194,7 @@
                     }
 
                     lyricsContainer.appendChild(p);
-                }
+                });
 
                 // 自动滚动到当前歌词
                 const currentLyricElement = lyricsContainer.querySelector('.highlight');
@@ -206,6 +202,15 @@
                     currentLyricElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             }
+
+            // 重置自动滚动定时器
+            clearTimeout(lyricsScrollTimeout);
+            lyricsScrollTimeout = setTimeout(() => {
+                const currentLyricElement = document.getElementById('lyrics-container').querySelector('.highlight');
+                if (currentLyricElement) {
+                    currentLyricElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 3000); // 3秒后自动滚动到当前歌词
         }
 
         // 修改后的播放控制函数
