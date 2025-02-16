@@ -168,7 +168,7 @@
 
             return parsed.sort((a, b) => a.time - b.time); // 按时间排序
         }
-        // 新增：歌词更新函数
+        // 歌词更新函数
         function updateLyrics() {
             if (!lyrics.length) return; // 如果没有歌词，直接返回
             const currentTime = audio.currentTime;
@@ -184,21 +184,15 @@
             if (newIndex !== currentLyricIndex) {
                 currentLyricIndex = newIndex;
                 const lyricsContainer = document.getElementById('lyrics-container');
-                lyricsContainer.innerHTML = ''; // 清空歌词显示
+                const lyricElements = lyricsContainer.querySelectorAll('p');
 
-                // 显示完整歌词
-                lyrics.forEach((lyric, i) => {
-                    const p = document.createElement('p');
-                    p.textContent = lyric.text;
-
-                    // 如果是当前歌词，设置高亮样式
+                // 更新歌词高亮状态
+                lyricElements.forEach((p, i) => {
                     if (i === currentLyricIndex) {
                         p.classList.add('highlight'); // 高亮当前歌词
                     } else {
                         p.classList.remove('highlight'); // 其他歌词正常显示
                     }
-
-                    lyricsContainer.appendChild(p);
                 });
 
                 // 自动滚动到当前歌词
@@ -334,7 +328,7 @@
 
             visualize();
 
-            // 新增：加载歌词
+            // 加载歌词
             lyrics = []; // 清空之前的歌词
             currentLyricIndex = -1; // 重置当前歌词索引
             document.getElementById('lyrics-container').textContent = ''; // 清空歌词显示
@@ -342,6 +336,16 @@
                 const lrcPath = track.path.replace(/\.[^.]+$/, '.lrc'); // 获取同目录下的 .lrc 文件路径
                 const content = await fs.readFile(lrcPath, 'utf-8'); // 读取歌词文件
                 lyrics = parseLyrics(content); // 解析歌词
+
+                // 立即显示完整歌词
+                const lyricsContainer = document.getElementById('lyrics-container');
+                lyricsContainer.innerHTML = ''; // 清空歌词显示
+
+                lyrics.forEach((lyric, i) => {
+                    const p = document.createElement('p');
+                    p.textContent = lyric.text;
+                    lyricsContainer.appendChild(p);
+                });
             } catch (error) {
                 console.log('未找到歌词文件'); // 如果没有歌词文件，忽略错误
             }
