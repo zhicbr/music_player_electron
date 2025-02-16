@@ -16,6 +16,21 @@ const store = new Store({
   }
 });
 
+//去重函数
+function deduplicatePlaylist(playlist) {
+  const uniqueTracks = [];
+  const trackMap = new Map(); // 用于存储已存在的歌曲路径
+
+  for (const track of playlist) {
+    if (!trackMap.has(track.path)) {
+      trackMap.set(track.path, true); // 标记路径为已存在
+      uniqueTracks.push(track);
+    }
+  }
+
+  return uniqueTracks;
+}
+
 async function scanMusicFolder(folderPath) {
   const entries = await fs.readdir(folderPath, { withFileTypes: true });
   const musicFiles = [];
@@ -50,9 +65,13 @@ async function scanMusicFolder(folderPath) {
       }
     }
   }
-  
+
+  //去重处理
   const currentList = store.get('playlist');
-  store.set('playlist', [...currentList, ...musicFiles]);
+  const newList = [...currentList, ...musicFiles];
+  const uniqueList = deduplicatePlaylist(newList); // 去重
+
+  store.set('playlist', uniqueList); // 保存去重后的播放列表
 
   // 如果是首次扫描，初始化播放状态
   if (store.get('isFirstTime') && musicFiles.length > 0) {
@@ -111,9 +130,17 @@ ipcMain.on('save-playback-state', (_, { index, time }) => {
   store.set('lastPlayedTime', time);
 });
 
+//处理保存完整播放列表
+ipcMain.on('save-full-playlist', (_, playlist) => {
+  const uniqueList = deduplicatePlaylist(playlist); // 去重
+  store.set('playlist', uniqueList); // 保存去重后的播放列表
+});
+
 ipcMain.handle('get-playlist', () => {
+  const playlist = store.get('playlist');
+  const uniqueList = deduplicatePlaylist(playlist); // 加载时去重
   return {
-    playlist: store.get('playlist'),
+    playlist: uniqueList,
     lastPlayedIndex: store.get('lastPlayedIndex'),
     lastPlayedTime: store.get('lastPlayedTime')
   };

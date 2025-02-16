@@ -541,7 +541,16 @@
         // 初始化加载播放列表和状态
         (async () => {
             const { playlist: storedPlaylist, lastPlayedIndex, lastPlayedTime } = await ipcRenderer.invoke('get-playlist');
-            playlist = storedPlaylist;
+            
+            // 加载时也去重，防止存储中存在旧的重复数据
+            playlist = storedPlaylist.reduce((acc, track) => {
+                const isDuplicate = acc.some(existingTrack => 
+                    existingTrack.title === track.title && 
+                    existingTrack.path === track.path
+                );
+                if (!isDuplicate) acc.push(track);
+                return acc;
+            }, []);
 
             // 处理索引越界
             currentTrackIndex = lastPlayedIndex;
@@ -592,6 +601,8 @@
             // 将新歌曲添加到播放列表
             playlist = [...playlist, ...uniqueTracks];
             renderPlaylist();
+            ipcRenderer.send('save-full-playlist', playlist);
+
         });
 
         // 更新进度条
