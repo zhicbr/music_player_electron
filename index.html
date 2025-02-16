@@ -44,6 +44,7 @@
     <script>
         const { ipcRenderer } = require('electron');
         const fs = require('fs/promises');
+        const path = require('path');
 
         let currentTrackIndex = 0;
         let playlist = [];
@@ -552,7 +553,13 @@
 
         // 监听播放列表更新
         ipcRenderer.on('update-playlist', (event, newTracks) => {
-            playlist = newTracks;
+            // 检查是否有重复的歌曲
+            const uniqueTracks = newTracks.filter(newTrack => 
+                !playlist.some(existingTrack => existingTrack.title === newTrack.title)
+            );
+
+            // 将新歌曲添加到播放列表
+            playlist = [...playlist, ...uniqueTracks];
             renderPlaylist();
         });
 
