@@ -318,3 +318,29 @@ audio {
 .player-controls button:hover {
     color: #8865ff;
 }
+
+/* 播放模式按钮样式 */
+#play-mode {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    right: 150px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #7f5fff;
+}
+
+#play-mode i {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#play-mode i.active {
+    opacity: 1;
+}

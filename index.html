@@ -30,6 +30,11 @@
                 <button id="prev"><i class="fas fa-backward"></i></button>
                 <button id="play-pause"><i class="fas fa-play"></i></button>
                 <button id="next"><i class="fas fa-forward"></i></button>
+                <button id="play-mode">
+                    <i class="fas fa-random" id="random-icon"></i> <!-- 随机播放 -->
+                    <i class="fas fa-retweet" id="repeat-icon"></i> <!-- 顺序播放 -->
+                    <i class="fas fa-redo" id="repeat-one-icon"></i> <!-- 单曲循环 -->
+                </button>
             </div>
             <div id="lyrics-container" class="lyrics-container"></div>
             <audio id="audio-player"></audio>
@@ -538,6 +543,67 @@
             return `${mins}:${secs.toString().padStart(2, '0')}`;
         }
 
+                // 新增：播放模式枚举
+        const PlayMode = {
+            SEQUENCE: 'sequence', // 顺序播放
+            RANDOM: 'random', // 随机播放
+            REPEAT_ONE: 'repeat_one' // 单曲循环
+        };
+
+        let currentPlayMode = PlayMode.SEQUENCE; // 默认顺序播放
+
+        // 新增：切换播放模式
+        function togglePlayMode() {
+            const randomIcon = document.getElementById('random-icon');
+            const repeatIcon = document.getElementById('repeat-icon');
+            const repeatOneIcon = document.getElementById('repeat-one-icon');
+
+            // 切换模式
+            switch (currentPlayMode) {
+                case PlayMode.SEQUENCE:
+                    currentPlayMode = PlayMode.RANDOM;
+                    randomIcon.classList.add('active');
+                    repeatIcon.classList.remove('active');
+                    repeatOneIcon.classList.remove('active');
+                    break;
+                case PlayMode.RANDOM:
+                    currentPlayMode = PlayMode.REPEAT_ONE;
+                    randomIcon.classList.remove('active');
+                    repeatIcon.classList.remove('active');
+                    repeatOneIcon.classList.add('active');
+                    break;
+                case PlayMode.REPEAT_ONE:
+                    currentPlayMode = PlayMode.SEQUENCE;
+                    randomIcon.classList.remove('active');
+                    repeatIcon.classList.add('active');
+                    repeatOneIcon.classList.remove('active');
+                    break;
+            }
+        }
+
+        // 新增：根据播放模式获取下一首歌曲
+        function getNextTrack() {
+            switch (currentPlayMode) {
+                case PlayMode.SEQUENCE:
+                    return (currentTrackIndex + 1) % playlist.length; // 顺序播放
+                case PlayMode.RANDOM:
+                    return Math.floor(Math.random() * playlist.length); // 随机播放
+                case PlayMode.REPEAT_ONE:
+                    return currentTrackIndex; // 单曲循环
+            }
+        }
+
+        // 修改：播放结束自动下一首
+        function handleTrackEnd() {
+            currentTrackIndex = getNextTrack(); // 根据播放模式获取下一首
+            playTrack(playlist[currentTrackIndex]);
+        }
+
+        // 新增：绑定播放模式按钮点击事件
+        document.getElementById('play-mode').addEventListener('click', togglePlayMode);
+
+        // 初始化播放模式图标
+        document.getElementById('repeat-icon').classList.add('active'); // 默认顺序播放
         // 初始化加载播放列表和状态
         (async () => {
             const { playlist: storedPlaylist, lastPlayedIndex, lastPlayedTime } = await ipcRenderer.invoke('get-playlist');
