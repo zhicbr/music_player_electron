@@ -56,6 +56,12 @@
         const { ipcRenderer } = require('electron');
         const fs = require('fs/promises');
         const path = require('path');
+        const { applyTheme, initTheme } = require('./js/themes');
+        initTheme();
+        // 监听主题切换
+        ipcRenderer.on('change-theme', (_, theme) => {
+            applyTheme(theme);
+        });
 
         let currentTrackIndex = 0;
         let audio = document.getElementById('audio-player');

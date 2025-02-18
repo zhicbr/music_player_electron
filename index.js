@@ -8,6 +8,7 @@ const slugify = require('slugify');
 // 修改存储设置
 const store = new Store({
   defaults: {
+    theme: 'light-purple',
     musicFolders: [],
     playlist: [],
     lastPlayedIndex: 0,
@@ -15,6 +16,9 @@ const store = new Store({
     isFirstTime: true
   }
 });
+// 添加IPC处理
+ipcMain.handle('get-theme', () => store.get('theme'));
+ipcMain.on('save-theme', (_, theme) => store.set('theme', theme));
 
 //去重函数
 function deduplicatePlaylist(playlist) {
@@ -117,6 +121,49 @@ function createWindow() {
         },
         { type: 'separator' },
         { role: 'quit' }
+      ]
+    },
+    {
+      label: 'setting',
+      submenu: [
+        {
+          label: 'theme',
+          submenu: [
+            {
+              label: '轻浅紫',
+              click: () => mainWindow.webContents.send('change-theme', 'light-purple')
+            },
+            {
+              label: '柠檬黄',
+              click: () => mainWindow.webContents.send('change-theme', 'lemon-yellow')
+            },
+            {
+              label: '薄荷绿',
+              click: () => mainWindow.webContents.send('change-theme', 'mint-green')
+            },
+            {
+            label: '浅草绿',
+            click: () => mainWindow.webContents.send('change-theme', 'meadow-green')
+            
+          },
+          {
+            label: '西瓜红',
+            click: () => mainWindow.webContents.send('change-theme', 'watermelon-red')
+           
+          },
+          {
+            label: '天空蓝',
+            click: () =>  mainWindow.webContents.send('change-theme', 'sky-blue')
+           
+          },
+          {
+            label: '鲜橙橙',
+            click: () => mainWindow.webContents.send('change-theme', 'vivid-orange')
+            
+          }
+            // 添加其他主题...
+          ]
+        }
       ]
     }
   ]);

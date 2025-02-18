@@ -1,5 +1,18 @@
+:root {
+    /* 默认主题（轻浅紫） */
+    --background-color: #f5e6ff;
+    --visualizer-bg: #dca3aa4d;
+    --toggle-button-color: #9a7dff;
+    --list-color: #e6d5ff;
+    --list-hover: #d9c7ff;
+    --button-hover: #6a48cc;
+    --progress-hover: #8e73d2;
+    --mode-hover: #3a07e2;
+    --highlight-color: #7f5fff;
+  }
+
 body {
-    background-color: #f5e6ff;
+    background-color: var(--background-color);
     color: #3d3d3d;
     font-family: 'Arial', sans-serif;
     margin: 0;
@@ -32,7 +45,7 @@ body {
     left: 10px;        
     right: 10px;       
     height: 270px;
-    background: rgba(220, 163, 170, 0.3);
+    background: var(--visualizer-bg);
     border-radius: 20px;
     display: flex;
     align-items: flex-end;
@@ -75,7 +88,7 @@ body {
     padding: 0;
     border: none;
     border-radius: 50%;
-    background-color: #9a7dff;
+    background-color: var(--toggle-button-color);
     color: white;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -84,6 +97,9 @@ body {
     align-items: center;
     justify-content: center;
     font-size: 16px;
+}
+.toggle-button:hover {
+    background-color: var(--button-hover);
 }
 
 .right-section-container.is-collapsed {
@@ -132,7 +148,7 @@ button:hover {
 
 .track {
     padding: 10px;
-    background-color: #e6d5ff;
+    background-color: var(--list-color);
     margin: 5px 0;
     border-radius: 4px;
     display: flex;
@@ -143,11 +159,11 @@ button:hover {
 }
 
 .track:hover {
-    background-color: #d9c7ff;
+    background-color: var(--list-hover);
 }
 
 .track.playing {
-    background-color: #7f5fff;
+    background-color: var(--highlight-color);
     color: white;
 }
 
@@ -172,7 +188,7 @@ button:hover {
 
 #now-playing {
     margin: 15px 0;
-    color: #7f5fff;
+    color: var(--highlight-color);
     font-weight: bold;
     font-size: 18px;
     text-align: center;
@@ -241,7 +257,7 @@ button:hover {
     color: #240303;
     white-space: pre-line;
     overflow-y: auto;
-    background-color: #f5e6ff;
+    background-color: var(--background-color);
     border-radius: 8px;
     transition: all 0.3s ease;
     font-family: 'Courier New', 'Microsoft YaHei', serif; /* 英文使用Georgia，中文使用华文行楷 */
@@ -250,7 +266,7 @@ button:hover {
 }
 /* 歌词高亮样式（当前播放的歌词） */
 .lyrics-container .highlight {
-    color: #7f5fff; /* 高亮颜色 */
+    color: var(--highlight-color); /* 高亮颜色 */
     font-weight: bold; /* 加粗 */
     font-size: 25px; /* 高亮时字体稍大 */
     word-spacing: 8px; 
@@ -294,7 +310,10 @@ audio {
 #progress-bar {
     width: 100%;
     cursor: pointer;
-    accent-color: #7f5fff; /* 将进度条的颜色设置为紫色 */
+    accent-color: var(--highlight-color); /* 将进度条的颜色设置为紫色 */
+}
+#progress-bar:hover {
+    background-color: var(--progress-hover); /* 鼠标悬停时的颜色 */
 }
 
 #time-display {
@@ -308,7 +327,7 @@ audio {
 .player-controls button {
     background-color: transparent;
     border: none;
-    color: #7f5fff;
+    color: var(--highlight-color);
     font-size: 24px;
     padding: 10px;
     cursor: pointer;
@@ -316,7 +335,7 @@ audio {
 }
 
 .player-controls button:hover {
-    color: #8865ff;
+    color: var(--button-hover) ;
 }
 
 /* 播放模式按钮样式 */
@@ -328,7 +347,10 @@ audio {
     border: none;
     background: none;
     cursor: pointer;
-    color: #7f5fff;
+    color: var(--highlight-color);
+}
+#play-mode:hover {
+    color: var(--mode-hover);
 }
 
 #play-mode i {
