@@ -366,3 +366,34 @@ audio {
 #play-mode i.active {
     opacity: 1;
 }
+
+.search-container {
+    padding: 1px;
+    background-color:var(--background-color); /* 搜索框背景色 */
+    z-index: 1; /* 确保搜索框在最上层 */
+    position: sticky; /* 固定搜索框 */
+    top: 15px; /* 固定在顶部 */
+}
+
+#search-input {
+    flex: 1;
+    width: 80%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#search-button {
+    padding: 8px 12px;
+    margin-left: 8px;
+    border: none;
+    background-color: var(--highlight-color);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#search-button:hover {
+    background-color: var(--button-hover);
+}

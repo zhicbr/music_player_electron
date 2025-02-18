@@ -42,6 +42,10 @@
         <div class="right-section-container" id="right-section-container">
             <button id="toggle-list" class="toggle-button">▶</button>
             <div class="right-section" id="right-section">
+                <div class="search-container">
+                    <input type="text" id="search-input" >
+                    <button id="search-button"><i class="fas fa-search"></i></button>
+                </div>
                 <div id="playlist"></div>
             </div>
         </div>
@@ -52,6 +56,7 @@
     <script src="js/visualizer.js"></script>
     <script src="js/playcontrol.js"></script>
     <script src="js/audio.js"></script>
+    <script src="js/search.js"></script>
    <script>
         const { ipcRenderer } = require('electron');
         const fs = require('fs/promises');
