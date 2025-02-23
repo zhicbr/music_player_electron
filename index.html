@@ -120,13 +120,8 @@
                 document.getElementById('current-time').textContent = formatDuration(lastPlayedTime);
                 document.getElementById('progress-bar').value = (lastPlayedTime / audio.duration) * 100 || 0;
 
-                // 初始化封面动画状态
-                const coverImg = document.getElementById('album-cover');
-                if (audio.paused) {
-                    coverImg.style.animationPlayState = 'paused'; // 如果音频是暂停的，封面动画也暂停
-                } else {
-                    coverImg.style.animationPlayState = 'running'; // 如果音频是播放的，封面动画继续
-                }
+                // 初始化按钮和封面状态
+                updatePlayPauseButton();
 
                 // 确保在初始化时绑定 timeupdate 事件
                 audio.addEventListener('timeupdate', updateProgress);

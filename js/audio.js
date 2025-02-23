@@ -8,6 +8,8 @@ async function playTrack(track) {
         audio.pause();
         audio.removeEventListener('timeupdate', updateProgress);
         audio.removeEventListener('ended', handleTrackEnd);
+        audio.removeEventListener('play', updatePlayPauseButton);
+        audio.removeEventListener('pause', updatePlayPauseButton);
     }
 
     isAudioLoading = true;
@@ -45,11 +47,13 @@ async function playTrack(track) {
         return;
     }
 
-    // 替换原有音频元素
+    // 替换原有音频元素并清理旧事件监听器
     const oldAudio = audio;
     audio = newAudio;
 
     if (oldAudio && typeof oldAudio.remove === 'function') {
+        oldAudio.removeEventListener('play', updatePlayPauseButton);
+        oldAudio.removeEventListener('pause', updatePlayPauseButton);
         oldAudio.remove();
     }
 
@@ -57,12 +61,9 @@ async function playTrack(track) {
     audio.currentTime = 0;
     audio.play();
 
-    // 如果音频正在播放，则确保封面动画状态为“running”
-    coverImg.style.animationPlayState = 'running';
-
-    // 更新播放控制状态
-    playPauseIcon.classList.remove('fa-play');
-    playPauseIcon.classList.add('fa-pause');
+    // 添加播放/暂停事件监听
+    audio.addEventListener('play', updatePlayPauseButton);
+    audio.addEventListener('pause', updatePlayPauseButton);
 
     // 显示专辑封面
     if (track.cover) {
@@ -88,7 +89,6 @@ async function playTrack(track) {
 
     // 开始旋转封面（确保同时添加类和设置动画状态）
     coverImg.classList.add('rotate');
-    coverImg.style.animationPlayState = 'running';
 
     // 滚动当前歌曲到中央
     const currentTrackElement = document.querySelector(`[data-index="${currentTrackIndex}"]`);
@@ -104,10 +104,6 @@ async function playTrack(track) {
     audio.addEventListener('ended', handleTrackEnd);
 
     // 每次播放时重新连接音频源到分析器
-    // if (source) {
-    //     source.disconnect();
-    // }
-    // 连接音频源到分析器
     source = audioContext.createMediaElementSource(audio);
     source.connect(analyser);
     analyser.connect(audioContext.destination);
@@ -152,6 +148,8 @@ async function loadTrack(track) {
         audio.pause();
         audio.removeEventListener('timeupdate', updateProgress);
         audio.removeEventListener('ended', handleTrackEnd);
+        audio.removeEventListener('play', updatePlayPauseButton);
+        audio.removeEventListener('pause', updatePlayPauseButton);
     }
 
     isAudioLoading = true;
@@ -187,11 +185,13 @@ async function loadTrack(track) {
         return;
     }
 
-    // 替换原有音频元素
+    // 替换原有音频元素并清理旧事件监听器
     const oldAudio = audio;
     audio = newAudio;
 
     if (oldAudio && typeof oldAudio.remove === 'function') {
+        oldAudio.removeEventListener('play', updatePlayPauseButton);
+        oldAudio.removeEventListener('pause', updatePlayPauseButton);
         oldAudio.remove();
     }
 
@@ -217,14 +217,13 @@ async function loadTrack(track) {
     document.querySelector('.playing')?.classList.remove('playing');
     document.querySelector(`[data-index="${currentTrackIndex}"]`).classList.add('playing');
 
-    // 确保暂停状态
+    // 确保暂停状态并添加事件监听
     audio.pause();
-    document.getElementById('play-pause').querySelector('i').classList.add('fa-play');
-    document.getElementById('play-pause').querySelector('i').classList.remove('fa-pause');
+    audio.addEventListener('play', updatePlayPauseButton);
+    audio.addEventListener('pause', updatePlayPauseButton);
+    updatePlayPauseButton(); // 初始化按钮状态
 
-    // 停止封面旋转
-    coverImg.style.animationPlayState = 'paused';
-                // 新增：加载歌词
+    // 新增：加载歌词
     lyrics = []; // 清空之前的歌词
     currentLyricIndex = -1; // 重置当前歌词索引
     document.getElementById('lyrics-container').textContent = ''; // 清空歌词显示
