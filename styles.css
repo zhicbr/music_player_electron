@@ -249,7 +249,8 @@ button:hover {
 .lyrics-container {
     width: 100%;
     max-width: 1000px;
-    height: 150px;
+    height: calc(100vh - 600px); /* 动态高度，根据页面高度调整 */
+    min-height: 150px; /* 最小高度 */
     margin: 5px 0;
     padding: 5px;
     text-align: center;
