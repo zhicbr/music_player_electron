@@ -132,6 +132,9 @@ async function playTrack(track) {
             p.textContent = lyric.text;
             lyricsContainer.appendChild(p);
         });
+        
+        // 初始化歌词点击事件
+        setupLyricsClickHandler();
     } catch (error) {
         console.log('未找到歌词文件'); // 如果没有歌词文件，忽略错误
     }

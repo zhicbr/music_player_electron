@@ -73,3 +73,22 @@ function updateLyrics() {
         }
     }, 3000); // 3秒后自动滚动到当前歌词
 }
+
+// 新增：点击歌词跳转到对应时间
+function setupLyricsClickHandler() {
+    const lyricsContainer = document.getElementById('lyrics-container');
+    lyricsContainer.addEventListener('click', (event) => {
+        const target = event.target;
+        if (target.tagName === 'P') {
+            const index = Array.from(lyricsContainer.children).indexOf(target);
+            if (index !== -1 && lyrics[index]) {
+                const time = lyrics[index].time;
+                audio.currentTime = time;
+                updateProgress(); // 更新进度条
+            }
+        }
+    });
+}
+
+// 初始化歌词点击事件
+setupLyricsClickHandler();
