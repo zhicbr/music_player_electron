@@ -1,3 +1,4 @@
+//提取除配置文件外的所有文件内容，并将其写入Markdown文件
 const fs = require('fs');
 const path = require('path');
 

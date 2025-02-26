@@ -7,8 +7,9 @@
     "start": "electron .",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "clean": "node clean.js",
-    "md": "node generate-md.js"
+    "clean": "node helper/clean.js",
+    "md": "node helper/generate-md.js",
+    "css": "node helper/find_duplicate_blocks.js"
   },
   "keywords": [],
   "author": "",

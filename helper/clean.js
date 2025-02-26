@@ -1,3 +1,5 @@
+//删除应用程序数据目录
+//在开发过程中，我们可能需要清除应用程序数据目录，以便重新生成应用程序数据。
 const path = require('path');
 const fs = require('fs').promises;
 
