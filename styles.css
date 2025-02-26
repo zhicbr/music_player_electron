@@ -78,7 +78,7 @@ body {
 .right-section::-webkit-scrollbar {
     display: none;
 }
-
+/*折叠按钮*/
 .toggle-button {
     position: fixed;
     left: calc(60% + 20px);
@@ -110,7 +110,7 @@ body {
 
 .right-section-container.is-collapsed .toggle-button {
     left: auto;
-    right: 20px;
+    right: 30px;
     transform: rotate(180deg);
 }
 
