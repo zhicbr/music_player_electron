@@ -4,6 +4,7 @@ const fs = require('fs/promises');
 const path = require('path'); 
 const musicMetadata = require('music-metadata');
 const slugify = require('slugify');
+const { globalShortcut } = require('electron');
 
 // 修改存储设置
 const store = new Store({
@@ -101,6 +102,9 @@ function createWindow() {
 
   mainWindow.loadFile('index.html');
 
+  globalShortcut.register('CommandOrControl+Shift+P', () => {
+    mainWindow.webContents.openDevTools();
+  });
   // 创建菜单
   const menu = Menu.buildFromTemplate([
     {
@@ -163,8 +167,32 @@ function createWindow() {
           }
             // 添加其他主题...
           ]
+        },
+      ]
+    },
+    {
+      label: 'about',
+      submenu:[
+        {
+          label: '关于我',
+          click: () => {
+            dialog.showMessageBox({
+              title: '关于我',
+              message: '2025'
+            });
+          }
+        },
+        {
+          label: '联系我',
+          click: () => {
+            dialog.showMessageBox({
+              title: '联系我',
+              message: '邮箱：'
+            });
+          }
         }
       ]
+
     }
   ]);
 
@@ -197,4 +225,5 @@ app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+  globalShortcut.unregisterAll();
 });

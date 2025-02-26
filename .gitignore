@@ -55,3 +55,5 @@ yarn-error.log
 
 # Ignore the node-gyp files for native modules
 .gyp_configure_settings.json
+
+output.md
