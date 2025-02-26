@@ -102,7 +102,10 @@ async function playTrack(track) {
     // 确保在播放时绑定 timeupdate 事件
     audio.addEventListener('timeupdate', updateProgress);
     audio.addEventListener('ended', handleTrackEnd);
-
+    // 别删
+    if (source) {
+        source.disconnect();
+    }
     // 每次播放时重新连接音频源到分析器
     source = audioContext.createMediaElementSource(audio);
     source.connect(analyser);

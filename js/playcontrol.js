@@ -55,6 +55,11 @@ function handleTrackEnd() {
 document.getElementById('play-pause').addEventListener('click', () => {
     if (audio.paused) {
         audio.play();
+        // 确保音频源连接到分析器，不要删
+        source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        visualize();
     } else {
         audio.pause();
     }
