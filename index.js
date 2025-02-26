@@ -199,7 +199,7 @@ function createWindow() {
   Menu.setApplicationMenu(menu);
 }
 
-// 新增：处理保存播放状态
+// 处理保存播放状态
 ipcMain.on('save-playback-state', (_, { index, time }) => {
   store.set('lastPlayedIndex', index);
   store.set('lastPlayedTime', time);
@@ -207,15 +207,14 @@ ipcMain.on('save-playback-state', (_, { index, time }) => {
 
 //处理保存完整播放列表
 ipcMain.on('save-full-playlist', (_, playlist) => {
-  const uniqueList = deduplicatePlaylist(playlist); // 去重
-  store.set('playlist', uniqueList); // 保存去重后的播放列表
+  // 直接保存播放列表，不进行去重，保持用户的排序顺序
+  store.set('playlist', playlist);
 });
 
 ipcMain.handle('get-playlist', () => {
   const playlist = store.get('playlist');
-  const uniqueList = deduplicatePlaylist(playlist); // 加载时去重
   return {
-    playlist: uniqueList,
+    playlist: playlist,
     lastPlayedIndex: store.get('lastPlayedIndex'),
     lastPlayedTime: store.get('lastPlayedTime')
   };
