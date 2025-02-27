@@ -32,10 +32,12 @@ function renderPlaylist(filter = '') {
     // 绑定点击事件
     document.querySelectorAll('.track').forEach(item => {
         // 播放歌曲点击事件
-        const trackInfo = item.querySelector('.track-info');
-        trackInfo.addEventListener('click', () => {
-            currentTrackIndex = parseInt(item.dataset.index);
-            playTrack(playlist[currentTrackIndex]);
+        item.addEventListener('click', (e) => {
+            // 如果点击的是编辑按钮或编辑菜单，则不触发播放
+            if (!e.target.closest('.edit-button') && !e.target.closest('.edit-menu')) {
+                currentTrackIndex = parseInt(item.dataset.index);
+                playTrack(playlist[currentTrackIndex]);
+            }
         });
         
         // 编辑按钮点击事件
