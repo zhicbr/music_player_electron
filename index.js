@@ -92,6 +92,9 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    maxWidth: 1200,
+    minWidth: 1000,
+    minHeight:730,
     icon:'resources/picture/icon.png',
     webPreferences: {
       nodeIntegration: true,
