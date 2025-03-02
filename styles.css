@@ -146,8 +146,9 @@ button:hover {
     margin-top: 20px;
 }
 
+
 .track {
-    padding: 10px;
+    padding: 10px 15px;
     background-color: var(--list-color);
     margin: 5px 0;
     border-radius: 4px;
@@ -155,8 +156,29 @@ button:hover {
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center top;
+    position: relative;
+    z-index: 1;
 }
+.track {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.track.dragging {
+    transform: scale(1.08) translateZ(0);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    opacity: 1 !important;
+    z-index: 100;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+.track.ghost {
+    opacity: 0.3;
+    transform: scale(0.98);
+}
+
 
 .track:hover {
     background-color: var(--list-hover);

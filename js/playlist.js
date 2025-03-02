@@ -12,7 +12,7 @@ function renderPlaylist(filter = '') {
 
     // 渲染过滤后的播放列表
     list.innerHTML = filteredPlaylist.map((track, index) => `
-        <div class="track ${playlist.indexOf(track) === currentTrackIndex ? 'playing' : ''}" data-index="${playlist.indexOf(track)}">
+        <div class="track ${playlist.indexOf(track) === currentTrackIndex ? 'playing' : ''}" data-index="${playlist.indexOf(track)}" draggable="true">
             <div class="track-info">
                 <span class="title">${track.title}</span>
                 <span class="artist">${track.artist}</span>
@@ -29,8 +29,66 @@ function renderPlaylist(filter = '') {
         </div>
     `).join('');
 
-    // 绑定点击事件
+    // 绑定事件
     document.querySelectorAll('.track').forEach(item => {
+        // 拖拽开始
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', item.dataset.index);
+            item.classList.add('dragging');
+            // 设置拖拽时的透明图像，移除默认拖拽预览
+            const dragImage = new Image();
+            dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            e.dataTransfer.setDragImage(dragImage, 0, 0);
+        });
+
+        // 拖拽结束
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+            document.querySelectorAll('.track.over').forEach(track => {
+                track.classList.remove('over');
+            });
+        });
+
+        // 拖拽经过（优化动画版本）
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const dragging = document.querySelector('.dragging');
+            if (!dragging || dragging === item) return;
+
+            const rect = item.getBoundingClientRect();
+            const midY = rect.top + rect.height / 2;
+            const offsetY = e.clientY - rect.top;
+            const percentage = Math.min(Math.max(offsetY / rect.height, 0), 1);
+
+            // 使用transform实现平滑插入动画
+            if (e.clientY < midY) {
+                item.style.transform = `translateY(${rect.height * percentage}px)`;
+                setTimeout(() => {
+                    item.parentNode.insertBefore(dragging, item);
+                    item.style.transform = '';
+                }, 0);
+            } else {
+                item.style.transform = `translateY(-${rect.height * (1 - percentage)}px)`;
+                setTimeout(() => {
+                    item.parentNode.insertBefore(dragging, item.nextElementSibling);
+                    item.style.transform = '';
+                }, 0);
+            }
+        });
+
+        // 拖拽离开
+        item.addEventListener('dragleave', () => {
+            item.classList.remove('over');
+        });
+
+        // 拖拽放置
+        item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            const toIndex = parseInt(item.dataset.index);
+            moveTrack(fromIndex, toIndex);
+        });
+
         // 播放歌曲点击事件
         item.addEventListener('click', (e) => {
             // 如果点击的是编辑按钮或编辑菜单，则不触发播放
@@ -87,6 +145,50 @@ function renderPlaylist(filter = '') {
             deleteTrack(trackIndex);
         });
     });
+}
+
+// 获取拖拽后的元素位置（优化版）
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.parentNode.querySelectorAll('.track:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        // 优化边界检测
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else if (offset >= 0 && !closest.element) {
+            // 处理拖拽到列表底部的情况
+            return { offset: offset, element: null };
+        }
+        return closest;
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// 移动歌曲到指定位置
+function moveTrack(fromIndex, toIndex) {
+    if (fromIndex === toIndex) return;
+    
+    // 保存当前播放的歌曲路径
+    const currentPlayingPath = playlist[currentTrackIndex]?.path;
+    
+    // 移动歌曲
+    const [movedTrack] = playlist.splice(fromIndex, 1);
+    playlist.splice(toIndex, 0, movedTrack);
+    
+    // 更新当前播放索引
+    if (fromIndex === currentTrackIndex) {
+        currentTrackIndex = toIndex;
+    } else if (fromIndex < currentTrackIndex && toIndex >= currentTrackIndex) {
+        currentTrackIndex--;
+    } else if (fromIndex > currentTrackIndex && toIndex <= currentTrackIndex) {
+        currentTrackIndex++;
+    }
+    
+    // 保存并重新渲染播放列表
+    savePlaylist();
+    renderPlaylist();
 }
 
 // 上移歌曲
