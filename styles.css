@@ -187,6 +187,7 @@ button:hover {
 }
 /*正在播放文字*/
 #now-playing {
+    z-index: 1000;
     margin: 15px 0;
     color: var(--highlight-color);
     font-weight: bold;
